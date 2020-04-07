@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SpSofty.CodeGeneration.Core.Models;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +16,8 @@ namespace SpSofty.CodeGeneration.Core.Cores
             this.configuration = configuration;
         }
 
-        public IEnumerable<Template> ReadTemplates()
+        #region Internal Methods
+        internal IEnumerable<Template> ReadTemplates()
         {
             return ReadTemplates(configuration.ConfigurationFile);
         }
@@ -37,7 +37,7 @@ namespace SpSofty.CodeGeneration.Core.Cores
             }
         }
 
-        public void WriteTemplates(IEnumerable<Template> templates)
+        internal void WriteTemplates(IEnumerable<Template> templates)
         {
             templates.ToList().ForEach(t => CreateDirectory(t.PhysicalPath));
 
@@ -47,7 +47,7 @@ namespace SpSofty.CodeGeneration.Core.Cores
             }
         }
 
-        public string ReadTemplateFile(string fullName)
+        internal string ReadTemplateFile(string fullName)
         {
             using (StreamReader reader = GetReader(fullName))
             {
@@ -61,7 +61,7 @@ namespace SpSofty.CodeGeneration.Core.Cores
             return ReadTemplateFile(fullName);
         }
 
-        public void WriteTemplateFile(TemplateBuilder templateBuilder)
+        internal void WriteTemplateFile(TemplateBuilder templateBuilder)
         {
             if (templateBuilder.Overide
                 || !File.Exists(templateBuilder.FullName))
@@ -91,6 +91,25 @@ namespace SpSofty.CodeGeneration.Core.Cores
             return string.Empty;
         }
 
+        internal string GetImportFileConfiguration(string pathUnzip)
+        {
+            string[] files = Directory.GetFiles(pathUnzip, @"*.json");
+            
+            if (files.Length == 0)
+            {
+                throw new FileNotFoundException("Template configuration file not found.");
+            }
+            if (files.Length > 1)
+            {
+                throw new FileLoadException("More than one template configuration file was found. It is not possible to load more than one configuration file.");
+            }
+
+            using (StreamReader reader = GetReader(files[0]))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
         internal void CreteRule(TemplateRule templateRule, string contentFile)
         {
             string fullName = GetFullNameFileRule(templateRule);
@@ -106,6 +125,37 @@ namespace SpSofty.CodeGeneration.Core.Cores
             }
         }
 
+        internal List<string> GetValidateStructureFiles(string path, string extension)
+        {
+            if (Directory.Exists(path))
+            {
+                string[] files = Directory.GetFiles(path, $"*{extension}");
+                if (files != null && files.Any())
+                {
+                    return files.Select(f => Path.GetFileName(f)).ToList();
+                }
+            }
+
+            return new List<string>();
+        }
+
+        internal void EditRule(TemplateRule templateRule, string contentFile)
+        {
+            string fullName = GetFullNameFileRule(templateRule);
+            using (StreamWriter writer = GetWriter(fullName))
+            {
+                writer.Write(contentFile);
+            }
+        }
+
+        internal void DeleteRule(TemplateRule templateRule)
+        {
+            string fullName = GetFullNameFileRule(templateRule);
+            File.Delete(fullName);
+        }
+        #endregion
+
+        #region Private Methods
         private string GetFullNameFileRule(TemplateRule templateRule)
         {
             return Path.Combine(configuration.PhysicalPathTemplate, templateRule.File);
@@ -128,19 +178,6 @@ namespace SpSofty.CodeGeneration.Core.Cores
         {
             return new StreamWriter(File.Open(path, FileMode.Create), Encoding.UTF8);
         }
-
-        internal List<string> GetValidateStructureFiles(string path, string extension)
-        {
-            if (Directory.Exists(path))
-            {
-                string[] files = Directory.GetFiles(path, $"*{extension}");
-                if (files != null && files.Any())
-                {
-                    return files.Select(f => Path.GetFileName(f)).ToList();
-                }
-            }
-
-            return new List<string>();
-        }
+        #endregion
     }
 }

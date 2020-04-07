@@ -1,16 +1,11 @@
 ﻿using SpSofty.CodeGeneration.Core.Constants;
 using SpSofty.CodeGeneration.Core.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SpSofty.CodeGeneration.Core.Cores
 {
-    public class TokenCore
+    internal class TokenCore
     {
         private readonly Configuration configuration;
 
@@ -19,14 +14,15 @@ namespace SpSofty.CodeGeneration.Core.Cores
             this.configuration = configuration;
         }
 
-        public TemplateBuilder Make(TemplateBuilder templateBuilder)
+        internal TemplateBuilder Make(TemplateBuilder templateBuilder)
         {
             templateBuilder.FileName = templateBuilder.FileName.Replace(Tokens.TARGET_NAME, templateBuilder.NameDefault);
             templateBuilder.DestinationPath = templateBuilder.DestinationPath.Replace(Tokens.TARGET_PROJECT_NAME, templateBuilder.PathNamespace);
 
-
+            string nameDefaultLower = char.ToLower(templateBuilder.NameDefault[0]) + templateBuilder.NameDefault.Substring(1);
             string fileContent = templateBuilder.FileContent;
             fileContent = fileContent.Replace(Tokens.SAFE_NAME, templateBuilder.NameDefault);
+            fileContent = fileContent.Replace(Tokens.SAFE_NAME_LOWER, nameDefaultLower);
             fileContent = fileContent.Replace(Tokens.ROOT_NAMESPACE, templateBuilder.PathNamespace);
 
             templateBuilder.FileContent = fileContent;

@@ -35,8 +35,15 @@ namespace SpSofty.CodeGeneration
         {
             get
             {
-                ThreadHelper.ThrowIfNotOnUIThread();
-                return System.IO.Path.GetDirectoryName(CurrentDTE.Solution.FullName);
+                try
+                {
+                    ThreadHelper.ThrowIfNotOnUIThread();
+                    return System.IO.Path.GetDirectoryName(CurrentDTE.Solution.FullName);
+                }
+                catch
+                {
+                    throw new NullReferenceException();
+                }
             }
         }
         private readonly Core.Models.Configuration configuration;
@@ -107,20 +114,17 @@ namespace SpSofty.CodeGeneration
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            //string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            //string title = "CodeGenerationCommand";
 
-            //// Show a message box to prove we were here
-            //VsShellUtilities.ShowMessageBox(
-            //    this.package,
-            //    message,
-            //    title,
-            //    OLEMSGICON.OLEMSGICON_INFO,
-            //    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            //    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            _ = RefreshCurrentDTEAsync();
 
-            var form = new Core.Forms.TemplateManagerForm(configuration);
-            form.Show();
+            var templateManagerForm = new Core.Forms.TemplateManagerForm(configuration);
+            templateManagerForm.Show();
+        }
+
+        private async Task RefreshCurrentDTEAsync()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            CurrentDTE = await ServiceProvider.GetServiceAsync(typeof(DTE)) as DTE;
         }
     }
 }

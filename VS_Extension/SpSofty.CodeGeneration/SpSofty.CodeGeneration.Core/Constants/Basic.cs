@@ -1,6 +1,6 @@
 ﻿namespace SpSofty.CodeGeneration.Core.Constants
 {
-    public static class Basic
+    internal static class Basic
     {
         public static string NAMESPACE_EMPYT = "[Namespace Empyt]";
         public static string REGEX_NAMESTACE = @"namespace\s+([\w.]*)";

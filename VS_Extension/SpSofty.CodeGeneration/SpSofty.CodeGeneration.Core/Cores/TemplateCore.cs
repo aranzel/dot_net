@@ -5,19 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SpSofty.CodeGeneration.Core.Cores
 {
-    public class TemplateCore
+    internal class TemplateCore
     {
         public Configuration Configuration { get; }
         public List<Template> Templates { get; private set; }
 
         private FileCore fileCore;
         private TokenCore tokenCore;
+        private CompactorCore compactorCore;
 
         public TemplateCore(Configuration configuration)
         {
@@ -25,6 +24,7 @@ namespace SpSofty.CodeGeneration.Core.Cores
             Initialize();
         }
 
+        #region Internal Methods
         internal void ReloadTemplates()
         {
             Templates = fileCore.ReadTemplates().ToList();
@@ -68,10 +68,50 @@ namespace SpSofty.CodeGeneration.Core.Cores
             SaveTemplates();
         }
 
+        internal void DeleteTemplate(string name)
+        {
+            Template template = GetTemplate(name);
+
+            if (Directory.Exists(template.PhysicalPath))
+            {
+                Directory.Delete(template.PhysicalPath, true);
+            }
+            Templates.Remove(template);
+
+            SaveTemplates();
+        }
+
         internal void Imporetes(string fileImporteTemplates)
         {
-            var templates = fileCore.ReadTemplates(fileImporteTemplates);
-            throw new NotImplementedException();
+            string pathUnzip = Path.Combine(Configuration.PhysicalPathTemplate, $"__temp_unzip_templates_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}");
+            if (Directory.Exists(pathUnzip))
+            {
+                Directory.Delete(pathUnzip, true);
+            }
+            Directory.CreateDirectory(pathUnzip);
+
+            try
+            {
+                compactorCore.UnzipPath(fileImporteTemplates, pathUnzip);
+                string contetConfiguretaion = fileCore.GetImportFileConfiguration(pathUnzip);
+                List<Template> importeTemplates = JsonConvert.DeserializeObject<List<Template>>(contetConfiguretaion);
+
+                var importeFilter = importeTemplates.Where(it => !Templates.Exists(t => t.Name.Equals(it.Name)));
+                foreach (Template templateTemplate in importeFilter)
+                {
+                    string pathRules = Path.Combine(pathUnzip, templateTemplate.Name);
+                    string targetPathRules = Path.Combine(Configuration.PhysicalPathTemplate, templateTemplate.Name);
+
+                    Directory.Move(pathRules, targetPathRules);
+                }
+
+                Templates.AddRange(importeFilter);
+                SaveTemplates();
+            }
+            finally
+            {
+                Directory.Delete(pathUnzip, true);
+            }
         }
 
         internal string GetNamespace(string fileName)
@@ -128,42 +168,6 @@ namespace SpSofty.CodeGeneration.Core.Cores
             return Templates.FirstOrDefault(t => t.Name.Equals(name));
         }
 
-        private List<TemplateBuilder> BuildTemplates(string nameNewFile, string solutionPath, IEnumerable<TemplateRule> templateRules)
-        {
-            List<TemplateBuilder> templateBuilders = new List<TemplateBuilder>();
-
-            foreach (TemplateRule rule in templateRules)
-            {
-                TemplateBuilder templateBuilder = CreateTemplateBuider(nameNewFile, solutionPath, rule);
-                templateBuilders.Add(tokenCore.Make(templateBuilder));
-            }
-
-            return templateBuilders;
-        }
-
-        private TemplateBuilder CreateTemplateBuider(string nameNewFile, string solutionPath, TemplateRule rule)
-        {
-            return new TemplateBuilder
-            {
-                NameDefault = nameNewFile,
-                PathNamespace = rule.TargeNamespace,//Path.GetFileName(solutionPath),
-
-                FileName = rule.Target,
-                SolutionPath = solutionPath,
-                DestinationPath = rule.DestinationPath,
-                FileContent = fileCore.ReadTemplateFile(Path.Combine(Configuration.PhysicalPathTemplate, rule.File)),
-                Overide = rule.Overide
-            };
-        }
-
-        private void Initialize()
-        {
-            fileCore = new FileCore(Configuration);
-            tokenCore = new TokenCore(Configuration);
-
-            Templates = fileCore.ReadTemplates().ToList();
-        }
-
         internal string GetFileName(string fileName)
         {
             return Path.GetFileName(fileName);
@@ -194,6 +198,27 @@ namespace SpSofty.CodeGeneration.Core.Cores
             template.TemplateRules.Add(templateRule);
             
             SaveTemplates();
+        }
+
+        internal void EditRule(string templateName, TemplateRule templateRule, string contentFile)
+        {
+            fileCore.EditRule(templateRule, contentFile);
+
+            Template template = GetTemplate(templateName);
+            TemplateRule templateRuleOld = template.TemplateRules.First(tr => tr.Name.Equals(templateRule.Name));
+            template.TemplateRules.Remove(templateRuleOld);
+            template.TemplateRules.Add(templateRule);
+
+            SaveTemplates();
+        }
+
+        internal void DeleteRule(string templateName, string ruleName)
+        {
+            Template template = GetTemplate(templateName);
+            TemplateRule templateRule = template.TemplateRules.First(tr => tr.File.Equals(ruleName));
+
+            fileCore.DeleteRule(templateRule);
+            template.TemplateRules.Remove(templateRule);
         }
 
         internal string GetEditFile(TemplateRule templateRule)
@@ -244,6 +269,13 @@ namespace SpSofty.CodeGeneration.Core.Cores
             }
         }
 
+        internal void ExportTemplates(string fileNameZip)
+        {
+            compactorCore.ZipPath(Configuration.PhysicalPathTemplate, fileNameZip);
+        }
+        #endregion
+
+        #region Private Methods
         private void CreateValidateStructureFiles(KeyValuePair<TemplateBuilder, List<string>> itemOther, List<string> newFiles)
         {
             if (newFiles.Any())
@@ -271,5 +303,44 @@ namespace SpSofty.CodeGeneration.Core.Cores
 
             return dicCurretState;
         }
+
+        private List<TemplateBuilder> BuildTemplates(string nameNewFile, string solutionPath, IEnumerable<TemplateRule> templateRules)
+        {
+            List<TemplateBuilder> templateBuilders = new List<TemplateBuilder>();
+
+            foreach (TemplateRule rule in templateRules)
+            {
+                TemplateBuilder templateBuilder = CreateTemplateBuider(nameNewFile, solutionPath, rule);
+                templateBuilders.Add(tokenCore.Make(templateBuilder));
+            }
+
+            return templateBuilders;
+        }
+
+        private TemplateBuilder CreateTemplateBuider(string nameNewFile, string solutionPath, TemplateRule rule)
+        {
+            return new TemplateBuilder
+            {
+                NameDefault = nameNewFile,
+                PathNamespace = rule.TargeNamespace,//Path.GetFileName(solutionPath),
+
+                FileName = rule.Target,
+                SolutionPath = solutionPath,
+                DestinationPath = rule.DestinationPath,
+                FileContent = fileCore.ReadTemplateFile(Path.Combine(Configuration.PhysicalPathTemplate, rule.File)),
+                Overide = rule.Overide
+            };
+        }
+
+        private void Initialize()
+        {
+            fileCore = new FileCore(Configuration);
+            tokenCore = new TokenCore(Configuration);
+            compactorCore = new CompactorCore();
+
+            Templates = fileCore.ReadTemplates().ToList();
+        }
+        #endregion
+
     }
 }

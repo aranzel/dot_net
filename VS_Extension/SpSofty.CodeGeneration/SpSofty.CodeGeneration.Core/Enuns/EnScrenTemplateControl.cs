@@ -1,6 +1,6 @@
 ﻿namespace SpSofty.CodeGeneration.Core.Enuns
 {
-    public enum EnScrenTemplateControl
+    internal enum EnScrenTemplateControl
     {
         Default = 1,
         Add = 2,

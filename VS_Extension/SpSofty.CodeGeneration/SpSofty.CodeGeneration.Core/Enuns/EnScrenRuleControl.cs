@@ -1,6 +1,6 @@
 ﻿namespace SpSofty.CodeGeneration.Core.Enuns
 {
-    public enum EnScrenRuleControl
+    internal enum EnScrenRuleControl
     {
         Default = 1,
         Add = 2,

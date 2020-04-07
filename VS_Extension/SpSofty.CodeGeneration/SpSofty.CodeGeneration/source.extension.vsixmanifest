@@ -4,6 +4,7 @@
         <Identity Id="SpSofty.CodeGeneration.bf37b01e-edd2-44dd-89d7-3b6abc9325fd" Version="1.0" Language="en-US" Publisher="Sergio Carlos Peres" />
         <DisplayName>SpSofty Code Generation</DisplayName>
         <Description xml:space="preserve">Generate code from a custom template.</Description>
+        <Icon>Resources\Extension-icon.png</Icon>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />

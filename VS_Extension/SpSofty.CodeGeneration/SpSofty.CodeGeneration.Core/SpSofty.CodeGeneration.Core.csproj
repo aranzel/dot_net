@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -48,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Constants\Basic.cs" />
     <Compile Include="Constants\Tokens.cs" />
+    <Compile Include="Cores\CompactorCore.cs" />
     <Compile Include="Cores\FileCore.cs" />
     <Compile Include="Cores\TokenCore.cs" />
     <Compile Include="Enuns\EnScrenRuleControl.cs" />

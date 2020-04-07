@@ -19,6 +19,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
         private readonly TemplateCore templateCore;
         private string titleGbRules;
         private string titleGbTemplates;
+        private bool isEditRule;
 
         public TemplateManagerForm(Configuration configuration)
         {
@@ -29,6 +30,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
             Initialize();
         }
 
+        #region Private Method
         private void Initialize()
         {
             WriteStatus("Welcome to the code generation manager.");
@@ -79,8 +81,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
             tsbTemplateSave.Enabled = false;
             tsbTemplateCancel.Enabled = false;
             tsbTemplateDelete.Enabled = false;
-            tsbTemplateImport.Enabled = false;
-            tsbTemplateExport.Enabled = false;
+            tsbValidateStructure.Enabled = false;
 
             gbTemplates.Enabled = false;
             gbTemplateName.Enabled = false;
@@ -94,8 +95,6 @@ namespace SpSofty.CodeGeneration.Core.Forms
             {
                 case EnScrenTemplateControl.Default:
                     tsbTemplateAdd.Enabled = true;
-                    tsbTemplateImport.Enabled = true;
-                    tsbTemplateExport.Enabled = true;
 
                     gbTemplates.Enabled = true;
                     break;
@@ -125,6 +124,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
                     tsbTemplateAdd.Enabled = true;
                     tsbTemplateEdit.Enabled = true;
                     tsbTemplateDelete.Enabled = true;
+                    tsbValidateStructure.Enabled = true;
 
                     gbTemplates.Enabled = true;
                     gbTemplateName.Enabled = true;
@@ -140,18 +140,22 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
         private void ScrenRuleControl(EnScrenRuleControl enTamlateViewButton)
         {
+            tsTemplate.Enabled = true;
             tsbRuleAdd.Enabled = false;
             tsbRuleEdit.Enabled = false;
             tsbRuleSave.Enabled = false;
             tsbRuleCancel.Enabled = false;
             tsbRuleDelete.Enabled = false;
 
+            gbTemplates.Enabled = false;
             gbRuleFile.Enabled = false;
             gbRuleTargeProjectNamespace.Enabled = false;
             gbRuleName.Enabled = false;
             gbRuleNamespace.Enabled = false;
             gbRuleFileEdit.Enabled = false;
 
+            btnTemplateNewStruture.Enabled = false;
+            lbRules.Enabled = false;
             btnRuleFile.Enabled = false;
             txtRuleTargeProjectNamespace.ReadOnly = true;
             txtRuleName.ReadOnly = true;
@@ -161,9 +165,14 @@ namespace SpSofty.CodeGeneration.Core.Forms
             switch (enTamlateViewButton)
             {
                 case EnScrenRuleControl.Default:
+                    lbRules.Enabled = true;
                     tsbRuleAdd.Enabled = true;
+
+                    btnTemplateNewStruture.Enabled = true;
+                    gbTemplates.Enabled = true;
                     break;
                 case EnScrenRuleControl.Add:
+                    tsTemplate.Enabled = false;
                     tsbRuleSave.Enabled = true;
                     tsbRuleCancel.Enabled = true;
 
@@ -182,6 +191,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
                     ClearScrenRule();
                     break;
                 case EnScrenRuleControl.Edit:
+                    tsTemplate.Enabled = false;
                     tsbRuleSave.Enabled = true;
                     tsbRuleCancel.Enabled = true;
 
@@ -191,17 +201,20 @@ namespace SpSofty.CodeGeneration.Core.Forms
                     gbRuleName.Enabled = true;
                     gbRuleNamespace.Enabled = true;
                     gbRuleFileEdit.Enabled = true;
-
-                    btnRuleFile.Enabled = true;
+                    
                     txtRuleName.ReadOnly = false;
                     txtRuleNamespace.ReadOnly = false;
                     rtbRuleEditFile.ReadOnly = false;
                     break;
                 case EnScrenRuleControl.Rule:
+                    lbRules.Enabled = true;
                     tsbRuleAdd.Enabled = true;
                     gbRuleTargeProjectNamespace.Enabled = true;
                     tsbRuleEdit.Enabled = true;
                     tsbRuleDelete.Enabled = true;
+
+                    btnTemplateNewStruture.Enabled = true;
+                    gbTemplates.Enabled = true;
                     break;
             }
         }
@@ -236,6 +249,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
             try
             {
                 templateCore.Imporetes(fileImporteTemplates);
+                AddTemplatesInListBox();
             }
             catch (Exception ex)
             {
@@ -258,6 +272,68 @@ namespace SpSofty.CodeGeneration.Core.Forms
             SetRichTextBox(contetFile);
         }
 
+        #region RuleEditFile
+        private void SetRichTextBox(string contentFile)
+        {
+            rtbRuleEditFile.Clear();
+
+            var regex = new System.Text.RegularExpressions.Regex(Environment.NewLine);
+            String[] lines = regex.Split(contentFile);
+
+            foreach (string l in lines)
+            {
+                ParseLine(l);
+            }
+        }
+
+        private void ParseLine(string line)
+        {
+            var r = new System.Text.RegularExpressions.Regex("([ \\t{}():;\\.\\n])");
+            String[] tokens = r.Split(line);
+            foreach (string token in tokens)
+            {
+                string currentToken = token.Replace(Environment.NewLine, "");
+
+                // Set the tokens default color and font.  
+                rtbRuleEditFile.SelectionColor = Color.Black;
+                rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Regular);
+                // Check whether the token is a keyword.   
+                String[] keywords = { "public", "void", "using", "static", "class", "interface", "const",
+                    "namespace", "virtual",
+                    "int", "String", "string", "float", "long", "double" };
+
+                for (int i = 0; i < keywords.Length; i++)
+                {
+                    if (keywords[i] == currentToken)
+                    {
+                        // Apply alternative color and font to highlight keyword.  
+                        rtbRuleEditFile.SelectionColor = Color.Blue;
+                        rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Bold);
+                        break;
+                    }
+                }
+
+                String[] keywordInternal = { Constants.Tokens.SAFE_NAME, Constants.Tokens.SAFE_NAME_LOWER, Constants.Tokens.ROOT_NAMESPACE };
+                for (int i = 0; i < keywordInternal.Length; i++)
+                {
+                    if (keywordInternal[i] == currentToken)
+                    {
+                        // Apply alternative color and font to highlight keyword.  
+                        rtbRuleEditFile.SelectionColor = Color.DarkGray;
+                        rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Bold);
+                        break;
+                    }
+                }
+
+                rtbRuleEditFile.SelectedText = token;
+            }
+            rtbRuleEditFile.SelectedText = "\n";
+        }
+        #endregion
+        #endregion
+
+        #region Events
+
         #region Click - Templates
         private void tsbTemplatesRefresh_Click(object sender, EventArgs e)
         {
@@ -265,6 +341,8 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
             templateCore.ReloadTemplates();
             AddTemplatesInListBox();
+            ScrenTemplateControl(EnScrenTemplateControl.Default);
+            ClearScrenTeplate();
         }
 
         private void tsbTemplatesImport_Click(object sender, EventArgs e)
@@ -275,14 +353,17 @@ namespace SpSofty.CodeGeneration.Core.Forms
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
                 // Filter by All Files
-                dlg.Filter = "Json|*.json|All Files|*.*";
+                dlg.Filter = "Zip |*.zip";
                 dlg.Multiselect = false;
+                dlg.InitialDirectory = configuration.PhysicalPathTemplate;
 
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     fileImporteTemplates = dlg.FileName;
                     WriteStatus($"Importing new templates from the file: {System.IO.Path.GetFileName(fileImporteTemplates)}");
                     ImportTemplates(fileImporteTemplates);
+                    ScrenTemplateControl(EnScrenTemplateControl.Default);
+                    ClearScrenTeplate();
                 }
                 else
                 {
@@ -296,6 +377,19 @@ namespace SpSofty.CodeGeneration.Core.Forms
         {
             WriteStatus("Export all templates");
 
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+
+                saveFileDialog.Filter = "Zip |*.zip";
+                saveFileDialog.FileName = $"{System.IO.Path.GetFileNameWithoutExtension(configuration.ConfigurationFile)}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.zip";
+                saveFileDialog.FilterIndex = 2;
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    templateCore.ExportTemplates(saveFileDialog.FileName);
+                }
+            }
         }
         #endregion
 
@@ -375,26 +469,25 @@ namespace SpSofty.CodeGeneration.Core.Forms
         {
             try
             {
+                string name = txtName.Text.Trim();
 
+                if (string.IsNullOrEmpty(name))
+                {
+                    WriteStatus("Template 'Name' cannot be empty.");
+                    return;
+                }
+
+                templateCore.DeleteTemplate(name);
 
                 ScrenTemplateControl(EnScrenTemplateControl.Default);
                 ScrenRuleControl(EnScrenRuleControl.Default);
                 WriteStatus("Deleted template");
+                AddTemplatesInListBox();
             }
             catch (Exception ex)
             {
                 WriteStatus($"Error trying to delete template: {ex.Message}");
             }
-        }
-
-        private void tsbTemplateImport_Click(object sender, EventArgs e)
-        {
-            WriteStatus("Import new template");
-        }
-
-        private void tsbTemplateExport_Click(object sender, EventArgs e)
-        {
-            WriteStatus("Export template");
         }
 
         private void btnCopyPhysicalPath_Click(object sender, EventArgs e)
@@ -414,12 +507,27 @@ namespace SpSofty.CodeGeneration.Core.Forms
             templateCore.CreateNewFile(txtTemplateNewStruture.Text, template);
 
             WriteStatus($"Create new struture '{txtTemplateNewStruture.Text}' with success");
+            MessageBox.Show("New structure creation process completed.");
+        }
+
+        private void tsbValidatestructure_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtName.Text))
+            {
+                WriteStatus("Template 'Name' cannot be empty.");
+                return;
+            }
+
+            int count = templateCore.ValidateStructure(txtName.Text);
+            WriteStatus($"Total files created during structure check: {count}");
+            MessageBox.Show("Structure validation process completed.");
         }
         #endregion
 
         #region Click - Rule
         private void tsbRuleAdd_Click(object sender, EventArgs e)
         {
+            isEditRule = false;
             ScrenRuleControl(EnScrenRuleControl.Add);
 
             WriteStatus($"Create new rule in the '{txtName.Text}' template");
@@ -427,6 +535,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
         private void tsbRuleEdit_Click(object sender, EventArgs e)
         {
+            isEditRule = true;
             ScrenRuleControl(EnScrenRuleControl.Edit);
 
             WriteStatus($"Edit the '{txtName.Text}' rule from the '{txtRuleName.Text}' template");
@@ -439,16 +548,19 @@ namespace SpSofty.CodeGeneration.Core.Forms
                 if (string.IsNullOrEmpty(txtRuleFile.Text))
                 {
                     WriteStatus("Input 'File Template' cannot be empty.");
+                    return;
                 }
 
                 if (string.IsNullOrEmpty(txtRuleTargeProjectNamespace.Text))
                 {
                     WriteStatus("Input 'Target Project Namespace' cannot be empty.");
+                    return;
                 }
 
                 if (string.IsNullOrEmpty(txtRuleName.Text))
                 {
                     WriteStatus("Input 'Target File Rule' cannot be empty.");
+                    return;
                 }
 
                 string templateName = txtName.Text;
@@ -462,7 +574,14 @@ namespace SpSofty.CodeGeneration.Core.Forms
                 };
 
                 string contentFile = rtbRuleEditFile.Text;
-                templateCore.CreateRule(templateName, templateRule, contentFile);
+                if (isEditRule)
+                {
+                    templateCore.EditRule(templateName, templateRule, contentFile);
+                }
+                else
+                {
+                    templateCore.CreateRule(templateName, templateRule, contentFile);
+                }
 
                 AddRuleInListBox(templateName);
                 WriteStatus($"Save the '{txtName.Text}' rule from the '{txtRuleName.Text}' template");
@@ -486,10 +605,17 @@ namespace SpSofty.CodeGeneration.Core.Forms
         {
             try
             {
+                if (string.IsNullOrEmpty(txtRuleFile.Text))
+                {
+                    WriteStatus("Input 'File Template' cannot be empty.");
+                    return;
+                }
 
+                templateCore.DeleteRule(txtName.Text, txtRuleFile.Text);
 
                 ScrenRuleControl(EnScrenRuleControl.Default);
                 WriteStatus($"Deleted the '{txtName.Text}' rule from the '{txtRuleName.Text}' template");
+                AddRuleInListBox(txtName.Text);
                 ClearScrenRule();
             }
             catch (Exception ex)
@@ -564,70 +690,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
                 WriteStatus($"View details of the '{template.Name}' rule of the '{rule.Name}' template");
             }
         }
-
-        #region RuleEditFile
-        private void SetRichTextBox(string contentFile)
-        {
-            rtbRuleEditFile.Clear();
-
-            var regex = new System.Text.RegularExpressions.Regex(Environment.NewLine);
-            String[] lines = regex.Split(contentFile);
-
-            foreach (string l in lines)
-            {
-                ParseLine(l);
-            }
-        }
-
-        private void ParseLine(string line)
-        {
-            var r = new System.Text.RegularExpressions.Regex("([ \\t{}():;\\.\\n])");
-            String[] tokens = r.Split(line);
-            foreach (string token in tokens)
-            {
-                string currentToken = token.Replace(Environment.NewLine, "");
-
-                // Set the tokens default color and font.  
-                rtbRuleEditFile.SelectionColor = Color.Black;
-                rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Regular);
-                // Check whether the token is a keyword.   
-                String[] keywords = { "public", "void", "using", "static", "class", "interface", "const", 
-                    "namespace", "virtual", 
-                    "int", "String", "string", "float", "long", "double" };
-
-                for (int i = 0; i < keywords.Length; i++)
-                {
-                    if (keywords[i] == currentToken)
-                    {
-                        // Apply alternative color and font to highlight keyword.  
-                        rtbRuleEditFile.SelectionColor = Color.Blue;
-                        rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Bold);
-                        break;
-                    }
-                }
-                
-                String[] keywordInternal = { Constants.Tokens.SAFE_NAME, Constants.Tokens.ROOT_NAMESPACE };
-                for (int i = 0; i < keywordInternal.Length; i++)
-                {
-                    if (keywordInternal[i] == currentToken)
-                    {
-                        // Apply alternative color and font to highlight keyword.  
-                        rtbRuleEditFile.SelectionColor = Color.DarkGray;
-                        rtbRuleEditFile.SelectionFont = new Font("Courier New", 10, FontStyle.Bold);
-                        break;
-                    }
-                }
-
-                rtbRuleEditFile.SelectedText = token;
-            }
-            rtbRuleEditFile.SelectedText = "\n";
-        }
         #endregion
 
-        private void tsbTestValidatestructure_Click(object sender, EventArgs e)
-        {
-            int count = templateCore.ValidateStructure(txtName.Text);
-            WriteStatus($"Total files created during structure check: {count}");
-        }
     }
 }

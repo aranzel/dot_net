@@ -30,6 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TemplateManagerForm));
             this.gbTemplate = new System.Windows.Forms.GroupBox();
+            this.gbTemplateNewStruture = new System.Windows.Forms.GroupBox();
+            this.txtTemplateNewStruture = new System.Windows.Forms.TextBox();
+            this.btnTemplateNewStruture = new System.Windows.Forms.Button();
             this.gbPhysicalPath = new System.Windows.Forms.GroupBox();
             this.txtPhysicalPath = new System.Windows.Forms.TextBox();
             this.btnCopyPhysicalPath = new System.Windows.Forms.Button();
@@ -45,8 +48,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbTemplateDelete = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbTemplateImport = new System.Windows.Forms.ToolStripButton();
-            this.tsbTemplateExport = new System.Windows.Forms.ToolStripButton();
+            this.tsbValidateStructure = new System.Windows.Forms.ToolStripButton();
             this.gbRules = new System.Windows.Forms.GroupBox();
             this.gbRule = new System.Windows.Forms.GroupBox();
             this.gbRuleTargeProjectNamespace = new System.Windows.Forms.GroupBox();
@@ -80,12 +82,9 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.tsbTestValidateStructure = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.gbTemplateNewStruture = new System.Windows.Forms.GroupBox();
-            this.txtTemplateNewStruture = new System.Windows.Forms.TextBox();
-            this.btnTemplateNewStruture = new System.Windows.Forms.Button();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.gbTemplate.SuspendLayout();
+            this.gbTemplateNewStruture.SuspendLayout();
             this.gbPhysicalPath.SuspendLayout();
             this.gbTemplateName.SuspendLayout();
             this.tsTemplate.SuspendLayout();
@@ -100,7 +99,6 @@
             this.gbTemplates.SuspendLayout();
             this.tsTemplates.SuspendLayout();
             this.statusStrip.SuspendLayout();
-            this.gbTemplateNewStruture.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbTemplate
@@ -119,6 +117,38 @@
             this.gbTemplate.TabIndex = 1;
             this.gbTemplate.TabStop = false;
             this.gbTemplate.Text = "Template";
+            // 
+            // gbTemplateNewStruture
+            // 
+            this.gbTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbTemplateNewStruture.Controls.Add(this.txtTemplateNewStruture);
+            this.gbTemplateNewStruture.Controls.Add(this.btnTemplateNewStruture);
+            this.gbTemplateNewStruture.Location = new System.Drawing.Point(716, 62);
+            this.gbTemplateNewStruture.Name = "gbTemplateNewStruture";
+            this.gbTemplateNewStruture.Size = new System.Drawing.Size(289, 62);
+            this.gbTemplateNewStruture.TabIndex = 9;
+            this.gbTemplateNewStruture.TabStop = false;
+            this.gbTemplateNewStruture.Text = "Create New Struture";
+            // 
+            // txtTemplateNewStruture
+            // 
+            this.txtTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTemplateNewStruture.Location = new System.Drawing.Point(6, 25);
+            this.txtTemplateNewStruture.Name = "txtTemplateNewStruture";
+            this.txtTemplateNewStruture.Size = new System.Drawing.Size(229, 26);
+            this.txtTemplateNewStruture.TabIndex = 3;
+            // 
+            // btnTemplateNewStruture
+            // 
+            this.btnTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTemplateNewStruture.Image = ((System.Drawing.Image)(resources.GetObject("btnTemplateNewStruture.Image")));
+            this.btnTemplateNewStruture.Location = new System.Drawing.Point(241, 22);
+            this.btnTemplateNewStruture.Name = "btnTemplateNewStruture";
+            this.btnTemplateNewStruture.Size = new System.Drawing.Size(40, 35);
+            this.btnTemplateNewStruture.TabIndex = 4;
+            this.btnTemplateNewStruture.UseVisualStyleBackColor = true;
+            this.btnTemplateNewStruture.Click += new System.EventHandler(this.btnTemplateNewStruture_Click);
             // 
             // gbPhysicalPath
             // 
@@ -188,10 +218,7 @@
             this.toolStripSeparator2,
             this.tsbTemplateDelete,
             this.toolStripSeparator3,
-            this.tsbTemplateImport,
-            this.tsbTemplateExport,
-            this.toolStripSeparator7,
-            this.tsbTestValidateStructure});
+            this.tsbValidateStructure});
             this.tsTemplate.Location = new System.Drawing.Point(3, 22);
             this.tsTemplate.Name = "tsTemplate";
             this.tsTemplate.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
@@ -283,27 +310,15 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 33);
             // 
-            // tsbTemplateImport
+            // tsbValidateStructure
             // 
-            this.tsbTemplateImport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbTemplateImport.Image = ((System.Drawing.Image)(resources.GetObject("tsbTemplateImport.Image")));
-            this.tsbTemplateImport.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.tsbTemplateImport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbTemplateImport.Name = "tsbTemplateImport";
-            this.tsbTemplateImport.Size = new System.Drawing.Size(34, 28);
-            this.tsbTemplateImport.Text = "Import Template";
-            this.tsbTemplateImport.Click += new System.EventHandler(this.tsbTemplateImport_Click);
-            // 
-            // tsbTemplateExport
-            // 
-            this.tsbTemplateExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbTemplateExport.Image = ((System.Drawing.Image)(resources.GetObject("tsbTemplateExport.Image")));
-            this.tsbTemplateExport.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.tsbTemplateExport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbTemplateExport.Name = "tsbTemplateExport";
-            this.tsbTemplateExport.Size = new System.Drawing.Size(34, 28);
-            this.tsbTemplateExport.Text = "Export Template";
-            this.tsbTemplateExport.Click += new System.EventHandler(this.tsbTemplateExport_Click);
+            this.tsbValidateStructure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbValidateStructure.Image = ((System.Drawing.Image)(resources.GetObject("tsbValidateStructure.Image")));
+            this.tsbValidateStructure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbValidateStructure.Name = "tsbValidateStructure";
+            this.tsbValidateStructure.Size = new System.Drawing.Size(34, 28);
+            this.tsbValidateStructure.Text = "Validate Structure";
+            this.tsbValidateStructure.Click += new System.EventHandler(this.tsbValidatestructure_Click);
             // 
             // gbRules
             // 
@@ -678,54 +693,6 @@
             // 
             this.openFileDialog.FileName = "openFileDialog1";
             // 
-            // tsbTestValidateStructure
-            // 
-            this.tsbTestValidateStructure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbTestValidateStructure.Image = ((System.Drawing.Image)(resources.GetObject("tsbTestValidateStructure.Image")));
-            this.tsbTestValidateStructure.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbTestValidateStructure.Name = "tsbTestValidateStructure";
-            this.tsbTestValidateStructure.Size = new System.Drawing.Size(34, 28);
-            this.tsbTestValidateStructure.Text = "Validate Structure";
-            this.tsbTestValidateStructure.Click += new System.EventHandler(this.tsbTestValidatestructure_Click);
-            // 
-            // toolStripSeparator7
-            // 
-            this.toolStripSeparator7.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(6, 33);
-            // 
-            // gbTemplateNewStruture
-            // 
-            this.gbTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbTemplateNewStruture.Controls.Add(this.txtTemplateNewStruture);
-            this.gbTemplateNewStruture.Controls.Add(this.btnTemplateNewStruture);
-            this.gbTemplateNewStruture.Location = new System.Drawing.Point(716, 62);
-            this.gbTemplateNewStruture.Name = "gbTemplateNewStruture";
-            this.gbTemplateNewStruture.Size = new System.Drawing.Size(289, 62);
-            this.gbTemplateNewStruture.TabIndex = 9;
-            this.gbTemplateNewStruture.TabStop = false;
-            this.gbTemplateNewStruture.Text = "Create New Struture";
-            // 
-            // txtTemplateNewStruture
-            // 
-            this.txtTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTemplateNewStruture.Location = new System.Drawing.Point(6, 25);
-            this.txtTemplateNewStruture.Name = "txtTemplateNewStruture";
-            this.txtTemplateNewStruture.Size = new System.Drawing.Size(229, 26);
-            this.txtTemplateNewStruture.TabIndex = 3;
-            // 
-            // btnTemplateNewStruture
-            // 
-            this.btnTemplateNewStruture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTemplateNewStruture.Image = ((System.Drawing.Image)(resources.GetObject("btnTemplateNewStruture.Image")));
-            this.btnTemplateNewStruture.Location = new System.Drawing.Point(241, 22);
-            this.btnTemplateNewStruture.Name = "btnTemplateNewStruture";
-            this.btnTemplateNewStruture.Size = new System.Drawing.Size(40, 35);
-            this.btnTemplateNewStruture.TabIndex = 4;
-            this.btnTemplateNewStruture.UseVisualStyleBackColor = true;
-            this.btnTemplateNewStruture.Click += new System.EventHandler(this.btnTemplateNewStruture_Click);
-            // 
             // TemplateManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -735,11 +702,15 @@
             this.Controls.Add(this.gbTemplates);
             this.Controls.Add(this.gbTemplate);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimizeBox = false;
             this.Name = "TemplateManagerForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = ":: Template Manager ::";
+            this.TopMost = true;
             this.gbTemplate.ResumeLayout(false);
             this.gbTemplate.PerformLayout();
+            this.gbTemplateNewStruture.ResumeLayout(false);
+            this.gbTemplateNewStruture.PerformLayout();
             this.gbPhysicalPath.ResumeLayout(false);
             this.gbPhysicalPath.PerformLayout();
             this.gbTemplateName.ResumeLayout(false);
@@ -766,8 +737,6 @@
             this.tsTemplates.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
-            this.gbTemplateNewStruture.ResumeLayout(false);
-            this.gbTemplateNewStruture.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -794,8 +763,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton tsbTemplateDelete;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripButton tsbTemplateImport;
-        private System.Windows.Forms.ToolStripButton tsbTemplateExport;
         private System.Windows.Forms.ToolStrip tsTemplates;
         private System.Windows.Forms.ToolStripButton tsbTemplatesImport;
         private System.Windows.Forms.ToolStripButton tsbTemplatesExport;
@@ -825,10 +792,10 @@
         private System.Windows.Forms.CheckBox chkRuleKeep;
         private System.Windows.Forms.GroupBox gbRuleTargeProjectNamespace;
         private System.Windows.Forms.TextBox txtRuleTargeProjectNamespace;
-        private System.Windows.Forms.ToolStripButton tsbTestValidateStructure;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripButton tsbValidateStructure;
         private System.Windows.Forms.GroupBox gbTemplateNewStruture;
         private System.Windows.Forms.TextBox txtTemplateNewStruture;
         private System.Windows.Forms.Button btnTemplateNewStruture;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog;
     }
 }
