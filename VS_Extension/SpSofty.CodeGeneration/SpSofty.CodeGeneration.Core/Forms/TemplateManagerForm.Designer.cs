@@ -40,8 +40,6 @@
             this.txtName = new System.Windows.Forms.TextBox();
             this.tsTemplate = new System.Windows.Forms.ToolStrip();
             this.tsbTemplateAdd = new System.Windows.Forms.ToolStripButton();
-            this.tsbTemplateEdit = new System.Windows.Forms.ToolStripButton();
-            this.tsbTemplateRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbTemplateSave = new System.Windows.Forms.ToolStripButton();
             this.tsbTemplateCancel = new System.Windows.Forms.ToolStripButton();
@@ -210,8 +208,6 @@
             this.tsTemplate.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.tsTemplate.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbTemplateAdd,
-            this.tsbTemplateEdit,
-            this.tsbTemplateRefresh,
             this.toolStripSeparator4,
             this.tsbTemplateSave,
             this.tsbTemplateCancel,
@@ -236,28 +232,6 @@
             this.tsbTemplateAdd.Size = new System.Drawing.Size(34, 28);
             this.tsbTemplateAdd.Text = "Create Template";
             this.tsbTemplateAdd.Click += new System.EventHandler(this.tsbTemplateAdd_Click);
-            // 
-            // tsbTemplateEdit
-            // 
-            this.tsbTemplateEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbTemplateEdit.Image = ((System.Drawing.Image)(resources.GetObject("tsbTemplateEdit.Image")));
-            this.tsbTemplateEdit.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.tsbTemplateEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbTemplateEdit.Name = "tsbTemplateEdit";
-            this.tsbTemplateEdit.Size = new System.Drawing.Size(34, 28);
-            this.tsbTemplateEdit.Text = "Edit Template";
-            this.tsbTemplateEdit.Click += new System.EventHandler(this.tsbTemplateEdit_Click);
-            // 
-            // tsbTemplateRefresh
-            // 
-            this.tsbTemplateRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbTemplateRefresh.Image = ((System.Drawing.Image)(resources.GetObject("tsbTemplateRefresh.Image")));
-            this.tsbTemplateRefresh.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.tsbTemplateRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbTemplateRefresh.Name = "tsbTemplateRefresh";
-            this.tsbTemplateRefresh.Size = new System.Drawing.Size(34, 28);
-            this.tsbTemplateRefresh.Text = "Refresh Template";
-            this.tsbTemplateRefresh.Click += new System.EventHandler(this.tsbTemplateRefresh_Click);
             // 
             // toolStripSeparator4
             // 
@@ -759,7 +733,6 @@
         private System.Windows.Forms.ToolStripButton tsbRuleEdit;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton tsbRuleDelete;
-        private System.Windows.Forms.ToolStripButton tsbTemplateEdit;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton tsbTemplateDelete;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
@@ -785,7 +758,6 @@
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripButton tsbTemplatesRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
-        private System.Windows.Forms.ToolStripButton tsbTemplateRefresh;
         private System.Windows.Forms.ToolStripButton tsbTemplateCancel;
         private System.Windows.Forms.ToolStripButton tsbRuleCancel;
         private System.Windows.Forms.OpenFileDialog openFileDialog;

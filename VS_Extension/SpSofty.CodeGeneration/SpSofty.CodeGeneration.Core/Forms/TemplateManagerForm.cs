@@ -3,12 +3,9 @@ using SpSofty.CodeGeneration.Core.Enuns;
 using SpSofty.CodeGeneration.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SpSofty.CodeGeneration.Core.Forms
@@ -28,14 +25,22 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
             InitializeComponent();
             Initialize();
+
+            Text = $"   {System.IO.Path.GetFileName(configuration.SolutionPath)}   {Text}";
+        }
+
+        public static void ShowMessage(string message, MessageBoxIcon icon = MessageBoxIcon.Error)
+        {
+            MessageBox.Show(message, 
+                "Code Generation",
+                MessageBoxButtons.OK, 
+                icon);
         }
 
         #region Private Method
         private void Initialize()
         {
             WriteStatus("Welcome to the code generation manager.");
-            tsbTemplateEdit.Visible = false;
-            tsbTemplateRefresh.Visible = false;
 
             titleGbTemplates = gbTemplates.Text;
             titleGbRules = gbRules.Text;
@@ -49,6 +54,12 @@ namespace SpSofty.CodeGeneration.Core.Forms
             ScrenTemplateControl(EnScrenTemplateControl.Default);
         }
 
+        private void WriteStatus(string message)
+        {
+            lblStatus.Text = message;
+        }
+
+        #region ListBox - lbTemplates and lbRules
         private void AddTemplatesInListBox()
         {
             lbTemplates.Items.Clear();
@@ -72,12 +83,12 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
             gbRules.Text = string.Concat(titleGbRules, lbRules.Items.Count == 0 ? string.Empty : $" - Count: {lbRules.Items.Count}");
         }
+        #endregion
 
+        #region Visibility Control
         private void ScrenTemplateControl(EnScrenTemplateControl enTamlateViewButton)
         {
             tsbTemplateAdd.Enabled = false;
-            tsbTemplateEdit.Enabled = false;
-            tsbTemplateRefresh.Enabled = false;
             tsbTemplateSave.Enabled = false;
             tsbTemplateCancel.Enabled = false;
             tsbTemplateDelete.Enabled = false;
@@ -109,20 +120,8 @@ namespace SpSofty.CodeGeneration.Core.Forms
                     txtName.ReadOnly = false;
                     ClearScrenTeplate();
                     break;
-                case EnScrenTemplateControl.Edit:
-                    tsbTemplateSave.Enabled = true;
-                    tsbTemplateCancel.Enabled = true;
-
-                    gbTemplateName.Enabled = true;
-                    gbPhysicalPath.Enabled = true;
-                    gbRules.Enabled = true;
-                    btnCopyPhysicalPath.Enabled = true;
-
-                    txtName.ReadOnly = false;
-                    break;
                 case EnScrenTemplateControl.Template:
                     tsbTemplateAdd.Enabled = true;
-                    tsbTemplateEdit.Enabled = true;
                     tsbTemplateDelete.Enabled = true;
                     tsbValidateStructure.Enabled = true;
 
@@ -218,7 +217,9 @@ namespace SpSofty.CodeGeneration.Core.Forms
                     break;
             }
         }
+        #endregion
 
+        #region Clear Fields
         private void ClearScrenTeplate()
         {
             txtName.Text = string.Empty;
@@ -238,11 +239,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
             txtRuleNamespace.Text = string.Empty;
             rtbRuleEditFile.Text = string.Empty;
         }
-
-        private void WriteStatus(string message)
-        {
-            lblStatus.Text = message;
-        }
+        #endregion
 
         private void ImportTemplates(string fileImporteTemplates)
         {
@@ -330,6 +327,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
             rtbRuleEditFile.SelectedText = "\n";
         }
         #endregion
+
         #endregion
 
         #region Events
@@ -337,12 +335,19 @@ namespace SpSofty.CodeGeneration.Core.Forms
         #region Click - Templates
         private void tsbTemplatesRefresh_Click(object sender, EventArgs e)
         {
-            WriteStatus("Refresh All Templates");
+            WriteStatus("Refresh all templates");
 
-            templateCore.ReloadTemplates();
-            AddTemplatesInListBox();
-            ScrenTemplateControl(EnScrenTemplateControl.Default);
-            ClearScrenTeplate();
+            try
+            {
+                templateCore.ReloadTemplates();
+                AddTemplatesInListBox();
+                ScrenTemplateControl(EnScrenTemplateControl.Default);
+                ClearScrenTeplate();
+            }
+            catch
+            {
+                WriteStatus("An error occurred while refresh all templates");
+            }
         }
 
         private void tsbTemplatesImport_Click(object sender, EventArgs e)
@@ -350,45 +355,58 @@ namespace SpSofty.CodeGeneration.Core.Forms
             string fileImporteTemplates;
             WriteStatus("Import of new templates");
 
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            try
             {
-                // Filter by All Files
-                dlg.Filter = "Zip |*.zip";
-                dlg.Multiselect = false;
-                dlg.InitialDirectory = configuration.PhysicalPathTemplate;
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    // Filter by All Files
+                    dlg.Filter = "Zip |*.zip";
+                    dlg.Multiselect = false;
+                    dlg.InitialDirectory = configuration.PhysicalPathTemplate;
 
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    fileImporteTemplates = dlg.FileName;
-                    WriteStatus($"Importing new templates from the file: {System.IO.Path.GetFileName(fileImporteTemplates)}");
-                    ImportTemplates(fileImporteTemplates);
-                    ScrenTemplateControl(EnScrenTemplateControl.Default);
-                    ClearScrenTeplate();
-                }
-                else
-                {
-                    WriteStatus("Import of new templates has been canceled");
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        fileImporteTemplates = dlg.FileName;
+                        WriteStatus($"Importing new templates from the file: {System.IO.Path.GetFileName(fileImporteTemplates)}");
+                        ImportTemplates(fileImporteTemplates);
+                        ScrenTemplateControl(EnScrenTemplateControl.Default);
+                        ClearScrenTeplate();
+                    }
+                    else
+                    {
+                        WriteStatus("Import of new templates has been canceled");
+                    }
                 }
             }
-
+            catch
+            {
+                WriteStatus("An error occurred while import of new templates");
+            }
         }
 
         private void tsbTemplatesExport_Click(object sender, EventArgs e)
         {
             WriteStatus("Export all templates");
 
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            try
             {
-
-                saveFileDialog.Filter = "Zip |*.zip";
-                saveFileDialog.FileName = $"{System.IO.Path.GetFileNameWithoutExtension(configuration.ConfigurationFile)}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.zip";
-                saveFileDialog.FilterIndex = 2;
-                saveFileDialog.RestoreDirectory = true;
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
-                    templateCore.ExportTemplates(saveFileDialog.FileName);
+
+                    saveFileDialog.Filter = "Zip |*.zip";
+                    saveFileDialog.FileName = $"{System.IO.Path.GetFileNameWithoutExtension(configuration.ConfigurationFile)}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.zip";
+                    saveFileDialog.FilterIndex = 2;
+                    saveFileDialog.RestoreDirectory = true;
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        templateCore.ExportTemplates(saveFileDialog.FileName);
+                    }
                 }
+            }
+            catch
+            {
+                WriteStatus("An error occurred while export all templates");
             }
         }
         #endregion
@@ -402,22 +420,6 @@ namespace SpSofty.CodeGeneration.Core.Forms
             txtPhysicalPath.Text = configuration.PhysicalPathTemplate;
 
             WriteStatus("Create new template");
-        }
-
-        private void tsbTemplateEdit_Click(object sender, EventArgs e)
-        {
-            ScrenTemplateControl(EnScrenTemplateControl.Edit);
-            ScrenRuleControl(EnScrenRuleControl.Default);
-
-            WriteStatus($"Edit template: {txtName.Text}");
-        }
-
-        private void tsbTemplateRefresh_Click(object sender, EventArgs e)
-        {
-            WriteStatus($"Refresh template: {txtName.Text}");
-
-            ScrenTemplateControl(EnScrenTemplateControl.Default);
-            ScrenRuleControl(EnScrenRuleControl.Default);
         }
 
         private void tsbTemplateSave_Click(object sender, EventArgs e)
@@ -492,35 +494,56 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
         private void btnCopyPhysicalPath_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(txtPhysicalPath.Text, TextDataFormat.Text);
+            try
+            {
+                Clipboard.SetText(txtPhysicalPath.Text, TextDataFormat.Text);
+            }
+            catch
+            {
+                WriteStatus("An error occurred while copying the path");
+            }
         }
 
         private void btnTemplateNewStruture_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtTemplateNewStruture.Text))
+            try
             {
-                WriteStatus("Template 'Create New Struture' cannot be empty.");
-                return;
+                if (string.IsNullOrEmpty(txtTemplateNewStruture.Text))
+                {
+                    WriteStatus("Template 'Create New Struture' cannot be empty.");
+                    return;
+                }
+
+                Template template = templateCore.GetTemplate(txtName.Text);
+                templateCore.CreateNewFile(txtTemplateNewStruture.Text, template);
+
+                WriteStatus($"Create new struture '{txtTemplateNewStruture.Text}' with success");
+                ShowMessage("New structure creation process completed.", MessageBoxIcon.Information);
             }
-
-            Template template = templateCore.GetTemplate(txtName.Text);
-            templateCore.CreateNewFile(txtTemplateNewStruture.Text, template);
-
-            WriteStatus($"Create new struture '{txtTemplateNewStruture.Text}' with success");
-            MessageBox.Show("New structure creation process completed.");
+            catch
+            {
+                WriteStatus("An error occurred while create new struture");
+            }
         }
 
         private void tsbValidatestructure_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtName.Text))
+            try
             {
-                WriteStatus("Template 'Name' cannot be empty.");
-                return;
-            }
+                if (string.IsNullOrEmpty(txtName.Text))
+                {
+                    WriteStatus("Template 'Name' cannot be empty.");
+                    return;
+                }
 
-            int count = templateCore.ValidateStructure(txtName.Text);
-            WriteStatus($"Total files created during structure check: {count}");
-            MessageBox.Show("Structure validation process completed.");
+                int count = templateCore.ValidateStructure(txtName.Text);
+                WriteStatus($"Total files created during structure check: {count}");
+                ShowMessage("Structure validation process completed.", MessageBoxIcon.Information);
+            }
+            catch
+            {
+                WriteStatus("An error occurred while structure validations");
+            }
         }
         #endregion
 
@@ -597,6 +620,7 @@ namespace SpSofty.CodeGeneration.Core.Forms
         private void tsbRuleCancel_Click(object sender, EventArgs e)
         {
             ScrenRuleControl(EnScrenRuleControl.Default);
+            ClearScrenRule();
 
             WriteStatus("Canceled");
         }
@@ -626,20 +650,28 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
         private void btnRuleFile_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog dlg = new OpenFileDialog())
+            try
             {
-                // Filter by All Files
-                dlg.Filter = "C#|*.cs;*.cshtml|All Files|*.*";
-                dlg.Multiselect = false;
-
-                if (dlg.ShowDialog() == DialogResult.OK)
+                using (OpenFileDialog dlg = new OpenFileDialog())
                 {
-                    PrepareRuleFile(dlg.FileName);
+                    // Filter by All Files
+                    dlg.Filter = "C#|*.cs;*.cshtml|All Files|*.*";
+                    dlg.Multiselect = false;
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        PrepareRuleFile(dlg.FileName);
+                    }
                 }
+            }
+            catch
+            {
+                WriteStatus("An error occurred while opening file");
             }
         }
         #endregion
 
+        #region Othe Events
         private void txtName_KeyUp(object sender, KeyEventArgs e)
         {
             txtPhysicalPath.Text = System.IO.Path.Combine(configuration.PhysicalPathTemplate, txtName.Text.Trim());
@@ -652,44 +684,60 @@ namespace SpSofty.CodeGeneration.Core.Forms
 
         private void lbTemplates_SelectedValueChanged(object sender, EventArgs e)
         {
-            string templateName = lbTemplates?.SelectedItem?.ToString() ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(templateName))
+            try
             {
-                Template template = templateCore.GetTemplate(templateName);
+                string templateName = lbTemplates?.SelectedItem?.ToString() ?? string.Empty;
 
-                txtName.Text = template.Name;
-                txtPhysicalPath.Text = template.PhysicalPath;
-                AddRuleInListBox(templateName);
+                if (!string.IsNullOrEmpty(templateName))
+                {
+                    Template template = templateCore.GetTemplate(templateName);
 
-                ScrenTemplateControl(EnScrenTemplateControl.Template);
-                ScrenRuleControl(EnScrenRuleControl.Default);
+                    txtName.Text = template.Name;
+                    txtPhysicalPath.Text = template.PhysicalPath;
+                    AddRuleInListBox(templateName);
 
-                WriteStatus($"View details of the '{template.Name}' template");
+                    ScrenTemplateControl(EnScrenTemplateControl.Template);
+                    ScrenRuleControl(EnScrenRuleControl.Default);
+
+                    WriteStatus($"View details of the '{template.Name}' template");
+                }
+            }
+            catch
+            {
+                WriteStatus("An error occurred while select one template");
             }
         }
 
         private void lbRules_SelectedValueChanged(object sender, EventArgs e)
         {
-            string ruleName = lbRules?.SelectedItem?.ToString() ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(ruleName))
+            try
             {
-                Template template = templateCore.GetTemplate(txtName.Text);
-                TemplateRule rule = template.TemplateRules.FirstOrDefault(tr => tr.Name.Equals(ruleName));
+                string ruleName = lbRules?.SelectedItem?.ToString() ?? string.Empty;
 
-                txtRuleFile.Text = rule.File;
-                txtRuleTargeProjectNamespace.Text = rule.TargeNamespace;
-                txtRuleName.Text = rule.Target;
-                txtRuleNamespace.Text = rule.DestinationPath;
-                chkRuleKeep.Checked = !rule.Overide;
-                SetRichTextBox(templateCore.GetEditFile(rule));
+                if (!string.IsNullOrEmpty(ruleName))
+                {
+                    Template template = templateCore.GetTemplate(txtName.Text);
+                    TemplateRule rule = template.TemplateRules.FirstOrDefault(tr => tr.Name.Equals(ruleName));
 
-                ScrenRuleControl(EnScrenRuleControl.Rule);
+                    txtRuleFile.Text = rule.File;
+                    txtRuleTargeProjectNamespace.Text = rule.TargeNamespace;
+                    txtRuleName.Text = rule.Target;
+                    txtRuleNamespace.Text = rule.DestinationPath;
+                    chkRuleKeep.Checked = !rule.Overide;
+                    SetRichTextBox(templateCore.GetEditFile(rule));
 
-                WriteStatus($"View details of the '{template.Name}' rule of the '{rule.Name}' template");
+                    ScrenRuleControl(EnScrenRuleControl.Rule);
+
+                    WriteStatus($"View details of the '{template.Name}' rule of the '{rule.Name}' template");
+                }
+            }
+            catch
+            {
+                WriteStatus($"An error occurred while select one rule of the template '{txtName.Text}'");
             }
         }
+        #endregion
+
         #endregion
 
     }

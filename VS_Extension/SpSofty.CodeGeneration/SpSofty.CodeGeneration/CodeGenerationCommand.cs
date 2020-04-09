@@ -1,11 +1,9 @@
-﻿using System;
-using System.ComponentModel.Design;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
-using EnvDTE;
+﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.ComponentModel.Design;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Task = System.Threading.Tasks.Task;
 
 namespace SpSofty.CodeGeneration
@@ -113,18 +111,17 @@ namespace SpSofty.CodeGeneration
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
+            try
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
 
-            _ = RefreshCurrentDTEAsync();
-
-            var templateManagerForm = new Core.Forms.TemplateManagerForm(configuration);
-            templateManagerForm.Show();
-        }
-
-        private async Task RefreshCurrentDTEAsync()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            CurrentDTE = await ServiceProvider.GetServiceAsync(typeof(DTE)) as DTE;
+                var templateManagerForm = new Core.Forms.TemplateManagerForm(configuration);
+                templateManagerForm.Show();
+            }
+            catch
+            {
+                Core.Forms.TemplateManagerForm.ShowMessage("An error occurred while trying to open a Code Generation screen.");
+            }
         }
     }
 }
